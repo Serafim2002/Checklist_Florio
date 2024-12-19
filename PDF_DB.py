@@ -18,9 +18,9 @@ def carregar_csv(caminho_csv):
     return pd.read_csv(caminho_csv)
 
 def verificar_produto(codigo, dados_produtos):
-    """Verifica se o código de produto está no CSV e retorna o nome do produto."""
+    """Verifica se o código de produto está no CSV e retorna o mesmo código se encontrado."""
     produto_encontrado = dados_produtos[dados_produtos['Codigo'] == int(codigo)]
-    return produto_encontrado.iloc[0]['Descricao'] if not produto_encontrado.empty else "Produto não encontrado"
+    return int(codigo) if not produto_encontrado.empty else "Código não encontrado"
 
 def extract_number(text):
     """Extrai o número do pedido do texto usando regex."""
@@ -29,17 +29,14 @@ def extract_number(text):
 
 def extract_volume_and_product(text, dados_produtos):
     """Extrai códigos de 6 dígitos do texto e verifica se existem no CSV."""
-    codigos = re.findall(r'\b\d{6}\b', text)
-    produtos = [(codigo, verificar_produto(codigo, dados_produtos)) for codigo in codigos]
-    print (f"{produtos}")
-    return [(c, p) for c, p in produtos if p != "Produto não encontrado"]
-    
+    codigos = re.findall(r'\b(\d{6,10})\b', text)  # Extrai números de 6 dígitos
+    produtos_verificados = [verificar_produto(codigo, dados_produtos) for codigo in codigos]
+    return [str(p) for p in produtos_verificados if p != "Código não encontrado"]
 
 def main():
     file_dir = open_file_dialog()
     caminho_csv = "C:/Users/Faturamento/Desktop/Projetos/Checklist_Florio/Excel/Produto.csv"
     dados_produtos = pd.read_csv(caminho_csv, sep=';')
-
 
     for arquivo in file_dir:
         pdf_reader = PdfReader(arquivo)
@@ -48,11 +45,12 @@ def main():
         for page_num, page in enumerate(pdf_reader.pages):
             page_text = page.extract_text()
             pedido_numero = extract_number(page_text)
-            produtos_encontrados = extract_volume_and_product(page_text, dados_produtos)
+            code = extract_volume_and_product(page_text, dados_produtos)
 
-            if pedido_numero and produtos_encontrados:
+            if pedido_numero and code:
                 # Gerar QR Code com informações do pedido e produto
-                qr_conteudo = f"{pedido_numero}\n" + "\n".join([f"{c} {p}" for c, p in produtos_encontrados])
+                qr_conteudo = f"{pedido_numero}\n" + "\n".join(code)  # Certifique-se de que cada código é uma string simples
+                print (f"{qr_conteudo}")
                 qrcode_img = qrcode.make(qr_conteudo)
 
                 # Salvar o QR code temporariamente
@@ -85,4 +83,4 @@ def main():
             pdf_writer.write(output)
 
 if __name__ == "__main__":
-    main() 
+    main()

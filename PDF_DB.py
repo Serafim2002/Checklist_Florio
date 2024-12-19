@@ -7,80 +7,76 @@ import qrcode
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 
-def open_file_dialog():
-    """Abre um diálogo para o usuário selecionar arquivos PDF."""
-    janela = Tk()
-    janela.withdraw()
+def open_files():
+    """Abre um diálogo para selecionar arquivos PDF."""
+    Tk().withdraw()
     return filedialog.askopenfilenames()
 
-def carregar_csv(caminho_csv):
-    """Carrega o CSV com dados de produtos usando pandas."""
-    return pd.read_csv(caminho_csv)
+def load_csv(path):
+    """Carrega o CSV com dados de produtos."""
+    return pd.read_csv(path, sep=';', encoding='utf-8')
 
-def verificar_produto(codigo, dados_produtos):
-    """Verifica se o código de produto está no CSV e retorna o mesmo código se encontrado."""
-    produto_encontrado = dados_produtos[dados_produtos['Codigo'] == int(codigo)]
-    return int(codigo) if not produto_encontrado.empty else "Código não encontrado"
+def get_order_num(txt):
+    """Extrai o número do pedido do texto."""
+    m = re.search(r'(\d+)\s*/1', txt)
+    return m.group(1) if m else None
 
-def extract_number(text):
-    """Extrai o número do pedido do texto usando regex."""
-    match = re.search(r'(\d+)\s*/1', text)
-    return match.group(1) if match else None
+def get_products(txt, prod):
+    """Verifica códigos do CSV no texto do PDF."""
+    codes = prod['Codigo'].astype(str).tolist()
+    lines = txt.splitlines()
+    result = []
 
-def extract_volume_and_product(text, dados_produtos):
-    """Extrai códigos de 6 dígitos do texto e verifica se existem no CSV."""
-    codigos = re.findall(r'\b(\d{6,10})\b', text)  # Extrai números de 6 dígitos
-    produtos_verificados = [verificar_produto(codigo, dados_produtos) for codigo in codigos]
-    return [str(p) for p in produtos_verificados if p != "Código não encontrado"]
+    for ln in lines:
+        qty = re.match(r'^\d+', ln)
+        if not qty:
+            continue
+
+        for code in codes:
+            if code in ln:
+                result.append(f"{qty.group()} {code}")
+                break
+
+    return result
 
 def main():
-    file_dir = open_file_dialog()
-    caminho_csv = "C:/Users/Faturamento/Desktop/Projetos/Checklist_Florio/Excel/Produto.csv"
-    dados_produtos = pd.read_csv(caminho_csv, sep=';')
+    files = open_files()
+    csv_path = "C:/Users/Faturamento/Desktop/Projetos/Checklist_Florio/Excel/Produto.csv"
+    prod = load_csv(csv_path)
 
-    for arquivo in file_dir:
-        pdf_reader = PdfReader(arquivo)
-        pdf_writer = PdfWriter()
+    for f in files:
+        rdr = PdfReader(f)
+        wtr = PdfWriter()
+        temp_dir = os.path.dirname(f)
 
-        for page_num, page in enumerate(pdf_reader.pages):
-            page_text = page.extract_text()
-            pedido_numero = extract_number(page_text)
-            code = extract_volume_and_product(page_text, dados_produtos)
+        for i, pg in enumerate(rdr.pages):
+            txt = pg.extract_text()
+            order_num = get_order_num(txt)
+            prod_info = get_products(txt, prod)
 
-            if pedido_numero and code:
-                # Gerar QR Code com informações do pedido e produto
-                qr_conteudo = f"{pedido_numero}\n" + "\n".join(code)  # Certifique-se de que cada código é uma string simples
-                print (f"{qr_conteudo}")
-                qrcode_img = qrcode.make(qr_conteudo)
+            if order_num and prod_info:
+                qr_data = f"{order_num}\n" + "\n".join(prod_info)
+                print(f"{qr_data}")
+                qr_img = qrcode.make(qr_data)
 
-                # Salvar o QR code temporariamente
-                pasta_origem = os.path.dirname(arquivo)
-                qr_path = os.path.join(pasta_origem, f"qr_code_{page_num}.png")
-                qrcode_img.save(qr_path)
+                qr_path = os.path.join(temp_dir, f"qr_{i}.png")
+                qr_img.save(qr_path)
 
-                # Criar um PDF temporário com o QR Code
-                temp_pdf_path = os.path.join(pasta_origem, f"temp_pdf_{page_num}.pdf")
+                temp_pdf_path = os.path.join(temp_dir, f"temp_{i}.pdf")
                 c = canvas.Canvas(temp_pdf_path, pagesize=letter)
                 c.drawImage(qr_path, 450, 100, width=100, height=100)
                 c.save()
 
-                # Adicionar o QR Code no PDF original
-                with open(arquivo, 'rb') as original_pdf, open(temp_pdf_path, 'rb') as temp_pdf:
-                    reader_original = PdfReader(original_pdf)
-                    reader_temp = PdfReader(temp_pdf)
-                    page_qr = reader_temp.pages[0]
-                    page_atual = reader_original.pages[page_num]
-                    page_atual.merge_page(page_qr)
-                    pdf_writer.add_page(page_atual)
+                temp_pdf = PdfReader(temp_pdf_path)
+                pg.merge_page(temp_pdf.pages[0])
+                wtr.add_page(pg)
 
-                # Remover arquivos temporários
                 os.remove(qr_path)
                 os.remove(temp_pdf_path)
 
-        # Salvar o PDF final
-        output_pdf = arquivo.replace(".pdf", "-modificado.pdf")
-        with open(output_pdf, 'wb') as output:
-            pdf_writer.write(output)
+        out_file = f.replace(".pdf", "-mod.pdf")
+        with open(out_file, 'wb') as out:
+            wtr.write(out)
 
 if __name__ == "__main__":
     main()

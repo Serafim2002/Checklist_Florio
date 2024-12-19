@@ -56,7 +56,6 @@ def main():
 
             if order_num and prod_info:
                 qr_data = f"{order_num}\n" + "\n".join(prod_info)
-                print(f"{qr_data}")
                 qr_img = qrcode.make(qr_data)
 
                 qr_path = os.path.join(temp_dir, f"qr_{i}.png")

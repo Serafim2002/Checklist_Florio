@@ -41,7 +41,7 @@ def get_products(txt, prod):
 
 def main():
     files = open_files()
-    csv_path = "C:/Users/Faturamento/Desktop/Projetos/Checklist_Florio/Excel/Produto.csv"
+    csv_path = "C:/Users/Faturamento/Desktop/Projetos/Checklist_Florio/data/Produto.csv"
     prod = load_csv(csv_path)
 
     for f in files:

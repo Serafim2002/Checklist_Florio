@@ -37,7 +37,7 @@ def finalizar():
 # Configuração da interface
 app = tk.Tk()
 app.title("Leitor de QR Code")
-app.geometry("600x500")
+app.geometry("800x600")
 app.configure(bg="#dcdad5")
 
 style = ttk.Style()

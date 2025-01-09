@@ -1,3 +1,11 @@
+def ind(cod):
+    type = cod[-2:]
+    
+    if type == "01":
+        return "unidade"
+    else:
+        return "caixa"
+    
 def process_qr_data(qr_data, prod_dict):
     """Processa o QR Code e retorna os resultados."""
     try:
@@ -15,7 +23,7 @@ def process_qr_data(qr_data, prod_dict):
             except ValueError:
                 items.append(f"{line} - Formato inválido")
 
-        output = f"Pedido: {order_id}\n\nQty:       Des:\n" + "\n".join(items)
+        output = f"Pedido: {order_id}\nO pedido esta por {ind(code)}!\n\nQty:       Des:\n" + "\n".join(items)
         return {"error": False, "message": "QR Code processado!", "output": output}
     except Exception as e:
         return {"error": True, "message": f"Erro ao processar QR Code: {e}", "output": ""}

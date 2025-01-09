@@ -1,4 +1,12 @@
 import pandas as pd
+import tkinter as tk
+from tkinter import messagebox
+
+def mostrar_erro(mensagem_erro):
+    root = tk.Tk()
+    root.withdraw() 
+    messagebox.showerror("Erro", mensagem_erro)
+    root.quit()
 
 def load_csv(path):
     """Carrega o CSV e normaliza os dados."""
@@ -10,5 +18,5 @@ def load_csv(path):
         df['Descricao'] = df['Descricao'].str.strip()
         return df.set_index('Codigo')['Descricao'].to_dict()
     except Exception as e:
-        print(f"Erro ao carregar CSV: {e}")
-        return {}
+        mensagem_erro = f"Erro ao carregar CSV: {e}"
+        mostrar_erro(mensagem_erro)

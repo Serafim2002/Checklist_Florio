@@ -1,13 +1,13 @@
 def ind(cod):
-    type = cod[-2:]
-    
-    if type == "01":
-        return "unidade"
+    """Identifica se o produto é unidade ou caixa."""
+    type_ = cod[-2:]
+    if type_ == "01":
+        return "UNIDADE"
     else:
-        return "caixa"
-    
+        return "CAIXA"
+
 def process_qr_data(qr_data, prod_dict):
-    """Processa o QR Code e retorna os resultados."""
+    """Processa o QR Code, retorna os resultados e salva em um arquivo."""
     try:
         lines = qr_data.splitlines()
         if len(lines) < 2:
@@ -23,7 +23,24 @@ def process_qr_data(qr_data, prod_dict):
             except ValueError:
                 items.append(f"{line} - Formato inválido")
 
-        output = f"Pedido: {order_id}\nO pedido esta por {ind(code)}!\n\nQty:       Des:\n" + "\n".join(items)
+        output = (
+            f"Pedido: {order_id}\nFormato: {ind(code)}\n\n"
+            f"Qty:       Des:\n" + "\n".join(items)
+        )
+
+        # Salvar resultado em um arquivo de texto
+        save_result(order_id, output)
+
         return {"error": False, "message": "QR Code processado!", "output": output}
     except Exception as e:
         return {"error": True, "message": f"Erro ao processar QR Code: {e}", "output": ""}
+
+def save_result(order_id, output):
+    """Salva o resultado do processamento em um arquivo de texto."""
+    filename = f"{order_id}.txt"
+    try:
+        with open(filename, "w", encoding="utf-8") as file:
+            file.write(output)
+        print(f"Resultado salvo em: {filename}")
+    except Exception as e:
+        print(f"Erro ao salvar resultado: {e}")

@@ -1,3 +1,5 @@
+from modules.save import save_result
+
 def ind(cod):
     """Identifica se o produto é unidade ou caixa."""
     type_ = cod[-2:]
@@ -29,18 +31,10 @@ def process_qr_data(qr_data, prod_dict):
         )
 
         # Salvar resultado em um arquivo de texto
-        save_result(order_id, output)
+        save_result(order_id, output, qr_data)
 
         return {"error": False, "message": "QR Code processado!", "output": output}
     except Exception as e:
         return {"error": True, "message": f"Erro ao processar QR Code: {e}", "output": ""}
 
-def save_result(order_id, output):
-    """Salva o resultado do processamento em um arquivo de texto."""
-    filename = f"{order_id}.txt"
-    try:
-        with open(filename, "w", encoding="utf-8") as file:
-            file.write(output)
-        print(f"Resultado salvo em: {filename}")
-    except Exception as e:
-        print(f"Erro ao salvar resultado: {e}")
+

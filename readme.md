@@ -6,5 +6,5 @@ Projeto_Checklist/
 │   └── utils.py             # Funções utilitárias
 │   └── gui.py               # Funções 
 ├── data/                    # Dados e arquivos auxiliares
-│   └── Produto.csv          # Arquivo CSV com os produtos
+│   └── D04_Produto_Con.csv          # Arquivo CSV com os produtos
 └── resources/               # Recursos adicionais (se necessário)

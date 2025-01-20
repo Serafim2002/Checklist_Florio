@@ -6,7 +6,7 @@ from modules.utils import update_status
 import subprocess
 
 # Carregar o dicionário de produtos
-csv_path = "C:/Users/Faturamento/Desktop/Projetos/Checklist_Florio/data/Produto.csv"
+csv_path = "C:/Users/Faturamento/Desktop/Projetos/Checklist_Florio/data/D04_Produto_Con.csv"
 prod_dict = load_csv(csv_path)
 
 def process_qr(event=None):

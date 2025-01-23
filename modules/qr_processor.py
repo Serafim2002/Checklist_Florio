@@ -1,5 +1,5 @@
 from modules.save import save_result
-
+'''
 def ind(cod):
     """Identifica se o produto é unidade ou caixa."""
     type_ = cod[-2:]
@@ -7,6 +7,7 @@ def ind(cod):
         return "UNIDADE"
     else:
         return "CAIXA"
+'''
 
 def process_qr_data(qr_data, prod_dict):
     """Processa o QR Code, retorna os resultados e salva em um arquivo."""
@@ -26,7 +27,7 @@ def process_qr_data(qr_data, prod_dict):
                 items.append(f"{line} - Formato inválido")
 
         output = (
-            f"Pedido: {order_id}\nFormato: {ind(code)}\n\n"
+            f"Pedido: {order_id}\nFormato: {(code)}\n\n"
             f"Qty:       Des:\n" + "\n".join(items)
         )
 

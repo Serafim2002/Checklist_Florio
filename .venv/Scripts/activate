@@ -35,7 +35,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="c:\Users\Faturamento\Desktop\Projetos\Checklist\.venv"
+VIRTUAL_ENV="c:\Users\Faturamento\Desktop\Projetos\Checklist_Florio\.venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"

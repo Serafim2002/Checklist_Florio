@@ -7,16 +7,13 @@ import qrcode
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 
-
 def open_files():
     """Abre um diálogo para selecionar arquivos PDF."""
     Tk().withdraw()
-    return filedialog.askopenfilenames(filetypes=[("PDF files", "*.pdf")])
+    return filedialog.askopenfilenames()
 
 def load_csv(path):
     """Carrega o CSV com dados de produtos e converte os códigos para strings."""
-    if not os.path.exists(path):
-        raise FileNotFoundError(f"O arquivo CSV '{path}' não foi encontrado.")
     df = pd.read_csv(path, sep=';', encoding='utf-8')
     df['D04_cod'] = df['D04_cod'].astype(str)  # Converte a coluna 'D04_cod' para string
     return df
@@ -26,38 +23,29 @@ def get_order(txt):
     match = re.search(r'(\d+)\s*/1', txt)
     return match.group(1) if match else None
 
-
-def get_type(code):
-    """Retorna 'UNIDADE' ou 'CAIXA' com base nos dois últimos dígitos do código."""
-    code = str(code)  # Converte para string
-    return "UN" if code[-2:] == "01" else "CX"
-
 def get_products(txt, prod):
-    """Extrai produtos do texto do PDF e retorna uma lista com quantidade, código e tipo."""
+    """Extrai produtos do texto do PDF."""
     codes = prod['D04_cod'].astype(str).tolist()
     lines = txt.splitlines()
     res = []
 
     for ln in lines:
-        qty_match = re.match(r'^\d+', ln)  # Captura a quantidade no início da linha
-        if not qty_match:
+        qty = re.match(r'^\d+', ln)
+        if not qty:
             continue
 
         for code in codes:
             if code in ln:
-                type_ = get_type(code)
-                qty = qty_match.group()
-                res.append(f"{qty} {code[:-2]}")  # Quantidade e código
+                res.append(f" {qty.group()} {code[:-2]}")
                 break
-    res.append(f"{type_}")  # Tipo em uma nova linha
-    return res
 
+
+    return res
 
 def create_qr(data, path):
     """Gera e salva um QR Code com os dados fornecidos."""
     qr = qrcode.make(data)
     qr.save(path)
-
 
 def merge_pdf(qr_path, temp_path, pg):
     """Insere o QR Code em um PDF temporário e o mescla na página."""
@@ -70,7 +58,6 @@ def merge_pdf(qr_path, temp_path, pg):
 
     os.remove(qr_path)
     os.remove(temp_path)
-
 
 def main():
     files = open_files()
@@ -88,7 +75,7 @@ def main():
             prod_info = get_products(txt, prod)
 
             if order and prod_info:
-                qr_data = f"{order}\n" + "\n".join(prod_info)
+                qr_data = f"{order}\n"+ "\n".join(prod_info)
 
                 qr_path = os.path.join(temp_dir, f"qr_{i}.png")
                 temp_pdf_path = os.path.join(temp_dir, f"temp_{i}.pdf")
@@ -101,7 +88,6 @@ def main():
         out_file = f.replace(".pdf", "-mod.pdf")
         with open(out_file, 'wb') as out:
             wtr.write(out)
-
 
 if __name__ == "__main__":
     main()

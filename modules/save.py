@@ -1,7 +1,7 @@
 def save_result(order_id, output, qr_data):
     """Salva o resultado do processamento em um arquivo de texto."""
-    filename = f"{order_id}.txt"
-    fileqr = f"QR.txt"
+    filename = f"C:/Users/Faturamento/Desktop/Projetos/Checklist_Florio/Result/{order_id}viewer.txt"
+    fileqr = f"C:/Users/Faturamento/Desktop/Projetos/Checklist_Florio/Result/{order_id}QR.txt"
     try:
         with open(filename, "w", encoding="utf-8") as file:
             file.write(output)

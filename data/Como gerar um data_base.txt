@@ -1,0 +1,4 @@
+No sistema, vá para a opção *Cadastro*
+Em seguida, selecione *Produtos Consulta*
+Aplique os filtros necessários para ajustar os parâmetros conforme desejado.
+Para exportar os dados, escolha a opção de exportação, preferencialmente para CSV ou Excel.
